@@ -1,0 +1,157 @@
+{
+  "name": "Whatnot Sourcing Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 30
+            }
+          ]
+        }
+      },
+      "name": "Every 30 min",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "url": "https://api.ebay.com/buy/browse/v1/item_summary/search",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "oAuth2Api",
+        "qs": {
+          "q": "sports cards graded",
+          "filter": "price:[0..150],conditions:{NEW|LIKE_NEW|USED_EXCELLENT}",
+          "limit": "50"
+        }
+      },
+      "name": "eBay Search",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [500, 200],
+      "notes": "Replace with your real eBay OAuth credentials and refine query"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Normalize eBay results into standard shape\nconst items = $input.all();\nreturn items.map(item => ({\n  json: {\n    title: item.json.title,\n    price: item.json.price?.value,\n    currency: item.json.price?.currency,\n    url: item.json.itemWebUrl,\n    location: item.json.itemLocation?.postalCode,\n    source: 'ebay',\n    image: item.json.image?.imageUrl\n  }\n}));"
+      },
+      "name": "Normalize eBay",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [750, 200]
+    },
+    {
+      "parameters": {
+        "model": "claude-3-5-sonnet-20241022",
+        "messages": {
+          "values": [
+            {
+              "content": "={{ $json }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Claude Margin Eval",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1,
+      "position": [1000, 300],
+      "notes": "Attach the system prompt from prompts/margin-evaluator.md"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json.pass }}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "name": "Pass Margin Filter",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [1250, 300]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $env.TELEGRAM_CHAT_ID }}",
+        "text": "=*💰 Deal Found*\n\n{{ $json.title }}\nAsking: ${{ $json.price }}\nEst. Net: ${{ $json.net_profit }}\nMargin: {{ $json.margin_pct }}%\n\n{{ $json.url }}",
+        "additionalFields": {}
+      },
+      "name": "Telegram Alert",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.1,
+      "position": [1500, 200]
+    }
+  ],
+  "connections": {
+    "Every 30 min": {
+      "main": [
+        [
+          {
+            "node": "eBay Search",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "eBay Search": {
+      "main": [
+        [
+          {
+            "node": "Normalize eBay",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize eBay": {
+      "main": [
+        [
+          {
+            "node": "Claude Margin Eval",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Claude Margin Eval": {
+      "main": [
+        [
+          {
+            "node": "Pass Margin Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pass Margin Filter": {
+      "main": [
+        [
+          {
+            "node": "Telegram Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2026-10-19T07:00:00.000Z",
+  "versionId": "1"
+}
