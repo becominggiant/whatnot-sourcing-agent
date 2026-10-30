@@ -21,6 +21,12 @@ On higher average order values the percentage drops because of the fixed $0.30.
 
 ## Implications for Sourcing Agent
 
-Always calculate true net = asking_price × (1 - 0.08) - (asking_price + shipping) × 0.029 - 0.30 - your_shipping_cost
+Fees come off the Whatnot **sell** price, not the price you pay (asking/buy price):
 
-Then compare against your target resale price on Whatnot to get real margin.
+```
+whatnot_fees = sell_price × 0.08 + (sell_price + buyer_shipping) × 0.029 + 0.30
+net_profit   = sell_price - whatnot_fees - your_shipping_cost - asking_price
+margin_pct   = net_profit / asking_price × 100
+```
+
+Example: sell $80, buyer shipping $5, your shipping $5, buy $40 → fees $9.17, net profit $25.83, margin 64.6%.

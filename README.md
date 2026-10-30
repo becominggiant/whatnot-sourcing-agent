@@ -75,7 +75,7 @@ Using the formula from [`docs/whatnot-fees.md`](docs/whatnot-fees.md) (8% commis
 
 **Deal B — same card listed at $60:** net profit $65.83 − $60 = $5.83 → 9.7% → **skip** (below 40%).
 
-> Note: the "true net" one-liner at the bottom of `docs/whatnot-fees.md` applies fees to `asking_price`; fees are actually charged on the Whatnot **sell** price, as in the table above. The prompt also doesn't define `margin_pct`; this README uses net profit ÷ purchase cost.
+> Note: the prompt doesn't define `margin_pct`; this README and `docs/whatnot-fees.md` use net profit ÷ purchase cost.
 
 ## Sample margin evaluator I/O
 
@@ -166,4 +166,4 @@ whatnot-sourcing-agent/
 
 ## License
 
-MIT (license file not yet added).
+MIT — see [`LICENSE`](LICENSE).
