@@ -1,0 +1,29 @@
+{
+  "_note": "Illustrative example only (hand-computed with the fee formula in docs/whatnot-fees.md). Not a recorded model run. margin_pct = net_profit / asking_price.",
+  "input": {
+    "listing": {
+      "title": "2018 Prizm Luka Doncic Base RC #280 PSA 9",
+      "price": 40.00,
+      "currency": "USD",
+      "url": "https://www.ebay.com/itm/EXAMPLE",
+      "location": "75201",
+      "source": "ebay"
+    },
+    "sold_comps": [
+      {"title": "2018 Prizm Luka Doncic #280 PSA 9", "sold_price": 84.00},
+      {"title": "2018 Prizm Luka Doncic #280 PSA 9", "sold_price": 79.00},
+      {"title": "2018 Prizm Luka Doncic #280 PSA 9", "sold_price": 82.00}
+    ],
+    "assumptions": {"buyer_paid_shipping": 5.00, "min_margin_pct": 40}
+  },
+  "output": {
+    "pass": true,
+    "estimated_sell_price": 80.00,
+    "estimated_fees": 9.17,
+    "estimated_shipping_cost": 5.00,
+    "net_profit": 25.83,
+    "margin_pct": 64.6,
+    "reason": "Conservative sell price below comp average; clears 40% threshold after fees and shipping.",
+    "comps_used": ["PSA 9 sold $84", "PSA 9 sold $79", "PSA 9 sold $82"]
+  }
+}
